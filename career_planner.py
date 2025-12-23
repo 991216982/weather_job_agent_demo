@@ -1,31 +1,28 @@
-from typing import Dict, Iterator
+from typing import List, Dict, Iterator
 from openai import OpenAI
 
 
-def career_report_stream(client: OpenAI, model: str, system_prompt: str, info: Dict[str, str]) -> Iterator[str]:
+def career_report_stream(client: OpenAI, model: str, system_prompt: str, history: List[Dict[str, str]]) -> Iterator[str]:
+    # 将对话历史转换为文本上下文
+    context = "\n".join([f"{msg['role']}: {msg['content']}" for msg in history])
+    
     prompt = (
-        f"基于以下信息，为用户生成一份简短的职业规划报告（使用中文）：\n"
-        f"兴趣：{info.get('interests', '')}\n"
-        f"技能：{info.get('skills', '')}\n"
-        f"职业目标：{info.get('goals', '')}\n"
+        f"基于以下的对话历史，为用户生成一份简短的职业规划报告（使用中文）：\n\n"
+        f"{context}\n\n"
         "报告内容应包括：\n"
-        "1) 基于兴趣与技能的职业方向建议；\n"
-        "2) 为实现目标需要学习或提升的关键技能；\n"
-        "3) 近 3 个月可实行的行动计划（分步骤）。\n"
+        "1) 总结用户的兴趣、技能与职业目标；\n"
+        "2) 基于兴趣与技能的职业方向建议；\n"
+        "3) 为实现目标需要学习或提升的关键技能；\n"
+        "4) 近 3 个月可实行的行动计划（分步骤）。\n"
     )
 
-    with client.responses.stream(
+    stream = client.chat.completions.create(
         model=model,
-        input=[{"role": "system", "content": system_prompt}, {"role": "user", "content": prompt}],
-    ) as stream:
-        for event in stream:
-            if event.type == "response.delta":
-                delta = event.delta
-                if delta and hasattr(delta, "content") and delta.content:
-                    for part in delta.content:
-                        if getattr(part, "type", "") == "output_text":
-                            yield part.text
-            elif event.type == "response.completed":
-                yield "\n"
-                break
+        messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": prompt}],
+        stream=True,
+    )
+    for chunk in stream:
+        if chunk.choices and chunk.choices[0].delta.content:
+            yield chunk.choices[0].delta.content
+    yield "\n"
 

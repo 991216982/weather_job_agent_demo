@@ -17,24 +17,21 @@ pip install -r requirements.txt
 ```
 
 ## 配置说明
+ 
+ 本项目默认使用阿里云百炼（DashScope）作为大模型服务提供商。
+ 
+ 环境变量：
+ - `DASHSCOPE_API_KEY`：阿里云百炼 API Key（优先使用，会自动设置 Base URL）
+ - `OPENAI_API_KEY`：标准 OpenAI Key（如果未设置阿里云 Key，则回退使用此 Key）
+ - `OPENAI_BASE_URL`：可选；手动指定 API 端点。若设置了 `DASHSCOPE_API_KEY`，默认值为 `https://dashscope.aliyuncs.com/compatible-mode/v1`
+ - `OPENAI_MODEL`：可选；默认 `qwen-plus`
+ 
+ Windows PowerShell 示例（阿里云）：
+ ```powershell
+ $env:DASHSCOPE_API_KEY="sk-xxxxxxxxxxxxxxxxxxxxxxxx"
+ # 默认模型为 qwen-plus，无需额外设置
+ ```
 
-本项目使用 OpenAI Python SDK 与兼容的服务进行交互。你可以：
-- 使用官方 OpenAI：设置 `OPENAI_API_KEY` 即可
-- 使用兼容的第三方（如 DeepSeek、Qwen 的 OpenAI 兼容端点）：需额外设置 `OPENAI_BASE_URL`
-
-环境变量：
-- `OPENAI_API_KEY`：你的 API Key（必需，否则职业规划报告不可用）
-- `OPENAI_BASE_URL`：可选；默认 `https://api.openai.com/v1`
-- `OPENAI_MODEL`：可选；默认 `gpt-4.1-mini`
-
-Windows PowerShell 示例：
-```powershell
-$env:OPENAI_API_KEY="your_key_here"
-# 如果使用第三方兼容端点：
-# $env:OPENAI_BASE_URL="https://api.deepseek.com/v1"
-# 自定义模型（可选）：
-# $env:OPENAI_MODEL="gpt-4o-mini"
-```
 
 ## 运行方式
 
